@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<valueItems>
+    <item>
+        <name>mane1</name>
+        <value>value1</value>
+    </item>
+    <item>
+        <name>mane2</name>
+        <value>value2</value>
+    </item>
+    <item>
+        <name>mane3</name>
+        <value>value3</value>
+    </item>
+</valueItems>
