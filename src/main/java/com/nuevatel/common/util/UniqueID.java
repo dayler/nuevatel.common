@@ -24,12 +24,23 @@ public class UniqueID {
         sha = MessageDigest.getInstance(DIGEST_ALGORITHM);
     }
 
+    /**
+     *
+     * @param length Length for the bit array.
+     * @return Next random value.
+     */
     public byte[] next(int length) {
         byte[] randomBytes = new byte[length];
+        prng.setSeed(System.currentTimeMillis());
         prng.nextBytes(randomBytes);
         return randomBytes;
     }
 
+    /**
+     *
+     * @param input Input to hash
+     * @return Hashed input.
+     */
     public byte[] digest(byte[] input) {
         return sha.digest(input);
     }

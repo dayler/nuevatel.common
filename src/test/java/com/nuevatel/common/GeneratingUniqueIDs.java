@@ -14,7 +14,8 @@ public class GeneratingUniqueIDs {
     public static void main (String... arguments) throws NoSuchAlgorithmException {
         UniqueID uniqueID = new UniqueID();
         for (int i = 0; i < 100; i++) {
-            System.out.println("## " + UniqueID.hexEncode(uniqueID.next(16)));
+            System.out.println("## " + UniqueID.hexEncode(uniqueID.next(8)));
+            System.out.println("## " + UniqueID.hexEncode(uniqueID.digest(uniqueID.next(16))));
         }
     }
 //    public static void main (String... arguments) {
