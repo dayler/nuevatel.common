@@ -1,5 +1,7 @@
 package com.nuevatel.common.util;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -34,6 +36,25 @@ public class UniqueID {
         prng.setSeed(System.currentTimeMillis());
         prng.nextBytes(randomBytes);
         return randomBytes;
+    }
+
+    /**
+     *
+     * @return Next integer random value.
+     */
+    public Integer nextInt() {
+        prng.setSeed(System.currentTimeMillis());
+        return new Integer(prng.nextInt());
+    }
+
+    /**
+     *
+     * @param bound Max value for integer.
+     * @return Next integer random value.
+     */
+    public Integer nextInt(int bound) {
+        prng.setSeed(System.currentTimeMillis());
+        return new Integer(prng.nextInt(bound));
     }
 
     /**
