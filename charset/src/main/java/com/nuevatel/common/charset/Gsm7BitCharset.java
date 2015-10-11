@@ -8,6 +8,12 @@ import java.nio.charset.CharsetEncoder;
  * Created by asalazar on 10/11/15.
  */
 public class Gsm7BitCharset extends Charset {
+
+    public Gsm7BitCharset() {
+        // TODO
+        this("", new String[]{});
+    }
+
     /**
      * Initializes a new charset with the given canonical name and alias
      * set.
