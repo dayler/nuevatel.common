@@ -15,6 +15,7 @@
         <module>core</module>
         <module>ds</module>
         <module>wsi</module>
+        <module>charset</module>
     </modules>
 
 
