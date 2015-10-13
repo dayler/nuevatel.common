@@ -18,6 +18,9 @@ dist/
 # idea ignore #
 .idea/**
 
+## svn
+.svn
+
 # eclipse workspace #
 .metadata
 
