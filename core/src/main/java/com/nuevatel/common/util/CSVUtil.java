@@ -41,13 +41,12 @@ public final class CSVUtil {
 
     /**
      * Read CSV input.
-     * 
+     *
      * @param in
      * @param ignoreLines
-     * @return
-     * @throws IOException
+     * @param ignoreIfStartWith If line is <code>ignoreIfStartWith<code/> ignore line.
      */
-    public static List<String[]>read(InputStream in, int ignoreLines) throws IOException {
+    public static List<String[]>read(InputStream in, int ignoreLines, String ignoreIfStartWith) throws IOException {
         Parameters.checkNull(in, "in");
 
         Reader reader = null;
@@ -61,6 +60,13 @@ public final class CSVUtil {
 
             while ((line = br.readLine()) != null) {
                 count++;
+                if (ignoreIfStartWith != null &&
+                    !ignoreIfStartWith.isEmpty() &&
+                    line.startsWith(ignoreIfStartWith)) {
+                    // Indicates the line is ignored. Comment line.
+                    continue;
+                }
+
                 if (count > ignoreLines) {
                     String[] metadata = line.split(SEPARATOR);
                     data.add(metadata);
@@ -73,5 +79,17 @@ public final class CSVUtil {
                 reader.close();
             }
         }
+    }
+
+    /**
+     * Read CSV input.
+     * 
+     * @param in
+     * @param ignoreLines
+     * @return
+     * @throws IOException
+     */
+    public static List<String[]>read(InputStream in, int ignoreLines) throws IOException {
+        return read(in, ignoreLines, null);
     }
 }

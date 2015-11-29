@@ -9,19 +9,7 @@ import java.util.Iterator;
  * This is a CharsetProvider for the GSM 7-Bit character set. It is named
  * X-Gsm7Bit since it's not registered in the IANA registry
  *
- * To activate this CharsetProvider, it's necessary to add a file to
- * the classpath of the JVM runtime at the following location:
- *   META-INF/services/java.nio.charsets.spi.CharsetProvider
- *
- * That file must contain a line with the fully qualified name of
- * this class on a line by itself:
- *   org.smpp.charset.Gsm7BitCharsetProvider
- *
- * See the javadoc page for java.nio.charsets.spi.CharsetProvider
- * for full details.
- *
- * @author Sverker Abrahamsson, Ariel Salazar
- * @version $Revision: 1.1 $
+ * @author Ariel Salazar
  */
 public class Gsm7BitCharsetProvider extends CharsetProvider {
 

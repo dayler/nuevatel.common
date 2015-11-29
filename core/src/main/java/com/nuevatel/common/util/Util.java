@@ -18,6 +18,42 @@ public class Util {
     }
 
     /**
+     * Executes delegate if obj == null
+     *
+     * @param obj
+     * @param delegate
+     * @param <T> No primitive type
+     */
+    public static <T> void ifNull(T obj, Delegate delegate) {
+        if (obj == null) {
+            delegate.execute();
+        }
+    }
+
+    /**
+     *
+     * @param obj
+     * @param defaultVal
+     * @return <b>defaultVal</b> if obj is not null. <b>null</b> if obj is null.
+     */
+    public static <T> T ifNotNull(T obj, T defaultVal) {
+        return obj == null ? obj : defaultVal;
+    }
+
+    /**
+     * Executes delegate if obj is not null
+     *
+     * @param obj
+     * @param delegate
+     * @param <T> No primitive type
+     */
+    public static <T> void ifNotNull(T obj, Delegate delegate) {
+        if (obj != null) {
+            delegate.execute();
+        }
+    }
+
+    /**
      * Safe cast, return null if the object cannot be casteable.
      * 
      * @param clazz Class to cast

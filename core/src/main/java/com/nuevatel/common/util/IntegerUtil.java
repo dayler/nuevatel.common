@@ -44,4 +44,26 @@ public final class IntegerUtil {
 
         return Integer.toString(rawInt);
     }
+
+    /**
+     *
+     * @param val Integer value to convert
+     * @return Byte representation for the Integer value, <code>null</code> if val is <code>null</code>.
+     */
+    public static Byte toByteValue(Integer val) {
+        return toByteValue(val, null);
+    }
+
+    /**
+     *
+     * @param val Integer value to convert.
+     * @param defaultVal Default val to return if val is <code>null</code>.
+     * @return Byte representation for the Integer value, <code>defaultVal</code> if val is <code>null</code>.
+     */
+    public static Byte toByteValue(Integer val, Byte defaultVal) {
+        if (val == null) {
+            return defaultVal;
+        }
+        return val.byteValue();
+    }
 }

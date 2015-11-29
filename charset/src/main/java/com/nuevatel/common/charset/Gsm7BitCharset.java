@@ -11,10 +11,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * A Charset implementation for Gsm 7-bit default and extended character set
- * See GSM 03.38
- *
- * @author Sverker Abrahamsson, Ariel D. Salazar H.
+ * @author Ariel D. Salazar H.
  *
  * Created by asalazar on 10/11/15.
  */
