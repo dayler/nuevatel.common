@@ -34,6 +34,10 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     }
     
     public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader, long expireAfterWriteTime, long expireAfterReadTime) {
+        if (cacheLoader == null) {
+            throw new IllegalArgumentException("cacheLoader is null");
+        }
+        
         this.cacheLoader = cacheLoader;
         this.expireAfterWriteTime = expireAfterWriteTime;
         this.expireAfterReadTime = expireAfterReadTime;
@@ -101,8 +105,13 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime);
         // get previous if it exists
         newCachedObj.setExpireAfterReadTask(expireAfterReadTask);
-        Cacheable<K, V> cachedObj = cacheMap.get(key);
-        return cachedObj == null ? null : cachedObj.get();
+        Cacheable<K, V> oldCachedObj = cacheMap.get(key);
+        if (oldCachedObj == null) {
+            return null;
+        }
+        oldCachedObj.cancelExpireAfterReadTask();
+        oldCachedObj.cancelExpireAfterWriteTask();
+        return oldCachedObj.get();
     }
 
     @Override
