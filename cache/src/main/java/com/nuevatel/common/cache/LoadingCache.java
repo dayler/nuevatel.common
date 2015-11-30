@@ -73,4 +73,9 @@ public interface LoadingCache<K,V> {
      * Removes all objects from cache.
      */
     void invalidateAll();
+    
+    /**
+     * Shutdown cache service.
+     */
+    void shutdown();
 }

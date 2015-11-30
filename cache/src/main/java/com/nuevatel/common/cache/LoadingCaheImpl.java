@@ -12,21 +12,41 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Implements lazy load acache.
+ * 
  * @author Ariel Salazar
  *
  */
 public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     
+    /**
+     * Lock object, used to controls critical sections.
+     */
     private Object lck = new Object();
     
+    /**
+     * Map all cached objects.
+     */
     private Map<K, Cacheable<K, V>>cacheMap = new ConcurrentHashMap<>();
     
+    /**
+     * Define the strategy to load an cachable object.
+     */
     private CacheLoader<K, V>cacheLoader;
     
+    /**
+     * Service used to clean cache map, used scheduled tasks.
+     */
     private ScheduledExecutorService service;
     
+    /**
+     * Time spend before remove cached object. <b>Always is removed after this time.</b>
+     */
     private long expireAfterWriteTime;
     
+    /**
+     * Time spend before remove cached object if the object was not read during this period.
+     */
     private long expireAfterReadTime;
     
     public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader) {
@@ -44,7 +64,6 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         // create service to invalidate keys
         service = Executors.newScheduledThreadPool(size, new MinPriorityThreadFactory());
     }
-    
     
     @Override
     public V get(K key) {
@@ -79,8 +98,7 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         }
         
         // reset expire after read task
-        resetExpireAfterReadTask(key, expireAfterReadTime, value);
-        
+        resetExpireAfterReadTask(key, value.getExpireAfterReadTime(), value);
         return value.get();
     }
 
@@ -132,6 +150,18 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     @Override
     public synchronized void invalidateAll() {
         cacheMap.clear();
+    }
+
+    @Override
+    public synchronized void shutdown() {
+        try {
+            if (service != null) {
+                service.shutdown();
+                service.awaitTermination(60, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void resetExpireAfterReadTask(K key, Long expireAfterReadTime, Cacheable<K, V> value) {
