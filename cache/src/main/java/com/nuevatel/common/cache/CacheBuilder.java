@@ -4,6 +4,8 @@
 package com.nuevatel.common.cache;
 
 /**
+ * Creates an instance of <code>LoadingCache</code>.
+ * 
  * @author Ariel Salazar
  *
  */
@@ -34,6 +36,12 @@ public final class CacheBuilder {
         return this;
     }
     
+    /**
+     * Creates <code>LoadingCache</code> based imput para meters.
+     * 
+     * @param cacheLoader
+     * @return
+     */
     public <K, V> LoadingCache<K, V>buildSimpleLoadingCache(CacheLoader<K, V>cacheLoader) {
         if (cacheLoader == null) {
             throw new IllegalArgumentException("cacheLoader is null");
