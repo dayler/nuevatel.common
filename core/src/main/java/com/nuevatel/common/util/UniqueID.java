@@ -46,7 +46,7 @@ public class UniqueID {
         prng.setSeed(System.currentTimeMillis());
         return new Integer(prng.nextInt());
     }
-
+    
     /**
      *
      * @param bound Max value for integer.
@@ -57,6 +57,15 @@ public class UniqueID {
         return new Integer(prng.nextInt(bound));
     }
 
+    /**
+     * 
+     * @return Next long random value.
+     */
+    public Long nextLong() {
+        prng.setSeed(System.currentTimeMillis());
+        return new Long(prng.nextLong());
+    }
+    
     /**
      *
      * @param input Input to hash

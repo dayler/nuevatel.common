@@ -10,7 +10,7 @@ public final class IntegerUtil {
     private IntegerUtil() {
         // No op.
     }
-
+    
     /**
      * Parse a String to its Integer representation. If the operation not succeeded returns null.
      *
@@ -18,9 +18,20 @@ public final class IntegerUtil {
      * @return The Integer representation of the String. If the operation not succeeded returns null.
      */
     public static Integer tryParse(String rawValue) {
+        return tryParse(rawValue, null);
+    }
+
+    /**
+     * Parse a String to its Integer representation. If the operation not succeeded returns defaultValue.
+     *
+     * @param rawValue The String to parse.
+     * @param defaultValue value to return if the the operation was not succeed.
+     * @return The Integer representation of the String. If the operation not succeeded returns defaultValue.
+     */
+    public static Integer tryParse(String rawValue, Integer defaultValue) {
         if (StringUtils.isBlank(rawValue)) {
             // No Parseable.
-            return null;
+            return defaultValue;
         }
 
         try {
@@ -28,7 +39,7 @@ public final class IntegerUtil {
             return Integer.parseInt(rawValue);
         } catch (Throwable ex) {
             // No Parseable.
-            return null;
+            return defaultValue;
         }
     }
 
