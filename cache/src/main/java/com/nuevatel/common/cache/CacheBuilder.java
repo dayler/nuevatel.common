@@ -3,6 +3,8 @@
  */
 package com.nuevatel.common.cache;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Creates an instance of <code>LoadingCache</code>.
  * 
@@ -16,6 +18,8 @@ public final class CacheBuilder {
     private long expireAfterWriteTime = 0;
     
     private long expireAfterReadTime = 0;
+    
+    private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
     CacheBuilder() {
         // to prevent instantiation
@@ -33,6 +37,16 @@ public final class CacheBuilder {
     
     public CacheBuilder setExpireAfterWriteTime(long expireAfterWriteTime) {
         this.expireAfterWriteTime = expireAfterWriteTime;
+        return this;
+    }
+    
+    /**
+     * 
+     * @param timeUnit <code>TimeUnit</code> to use for <code>expireAfterReadTime</code> and <code>expireAfterWriteTime</code>.
+     * @return
+     */
+    public CacheBuilder setTimeUnit(TimeUnit timeUnit) {
+        this.timeUnit = timeUnit;
         return this;
     }
     
@@ -58,6 +72,11 @@ public final class CacheBuilder {
         if (expireAfterWriteTime < 0) {
             throw new IllegalArgumentException("expireAfterWriteTime >= 0 actual " + expireAfterWriteTime);
         }
+        
+        if (timeUnit == null) {
+            throw new IllegalArgumentException("timeUnit != null actula " + timeUnit);
+        }
+        
         return new LoadingCaheImpl<>(size, cacheLoader, expireAfterWriteTime, expireAfterReadTime);
     }
     

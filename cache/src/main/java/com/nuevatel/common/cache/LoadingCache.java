@@ -3,6 +3,8 @@
  */
 package com.nuevatel.common.cache;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Define the service interface for the cache service.
  * 
@@ -28,6 +30,16 @@ public interface LoadingCache<K,V> {
     V get(K key, Long expireAfterWriteTime, Long expireAfterReadTime);
     
     /**
+     * 
+     * @param key key Key to identify the cached object.
+     * @param expireAfterWriteTime custom time to invalidate after last write.
+     * @param expireAfterReadTime custom time to invalidate after last read, reset if is read before this time.
+     * @param timeUnit <code>TimeUnit</code> used for expireAfterReadTime and expireAfterWriteTime.
+     * @return V Object associated with the key. <b>Load if not exists</b>
+     */
+    V get(K key, Long expireAfterWriteTime, Long expireAfterReadTime, TimeUnit timeUnit);
+    
+    /**
      * Put an element in the cache, with key. If previous element is existing with the same key, returns previous element.
      * 
      * @param key Key to identify the element.
@@ -46,6 +58,18 @@ public interface LoadingCache<K,V> {
      * @return Replaced element if it exists.
      */
     V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime);
+    
+    /**
+     * Put an element in the cache, with key. If previous element is existing with the same key, returns previous element.
+     * 
+     * @param key Key to identify the element.
+     * @param value Value to insert in the cache.
+     * @param expireAfterWriteTime custom time to invalidate after last write.
+     * @param expireAfterReadTime custom time to invalidate after last read, reset if is read before this time.
+     * @param timeUnit <code>TimeUnit</code> used for expireAfterReadTime and expireAfterWriteTime.
+     * @return Replaced element if it exists.
+     */
+    V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime, TimeUnit timeUnit);
     
     /**
      * 

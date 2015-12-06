@@ -4,9 +4,10 @@
 package com.nuevatel.common.cache;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Expirable cached object.
+ * Cached object.
  * 
  * @author Ariel Salazar
  *
@@ -21,6 +22,11 @@ public class CachedObject <K, V> implements Cacheable<K, V> {
     
     private long expireAfterReadTime;
     
+    /**
+     * <code>TimeUnit</code> for <code>expireAfterWriteTime</code> and <code>expireAfterReadTime</code>.
+     */
+    private TimeUnit timeUnit;
+    
     private V obj;
     
     /**
@@ -30,10 +36,11 @@ public class CachedObject <K, V> implements Cacheable<K, V> {
      * @param expireAfterReadTime Time in milliseconds to expire if the object is no read from cache, for each access the timer is reset. Set 0 to
      * indicate never.
      */
-    public CachedObject(V obj, long expireAfterWriteTime, long expireAfterReadTime) {
+    public CachedObject(V obj, long expireAfterWriteTime, long expireAfterReadTime, TimeUnit timeUnit) {
         this.obj = obj;
         this.expireAfterWriteTime = expireAfterWriteTime;
         this.expireAfterReadTime = expireAfterReadTime;
+        this.timeUnit = timeUnit;
     }
 
     /**
@@ -74,12 +81,22 @@ public class CachedObject <K, V> implements Cacheable<K, V> {
     }
 
     @Override
+    public TimeUnit getExpireAfterReadTimeUnit() {
+        return timeUnit;
+    }
+
+    @Override
     public void cancelExpireAfterReadTask() {
         if (expireAfterReadTask != null && !expireAfterReadTask.isCancelled()) {
             expireAfterReadTask.cancel(false);
             // reset task
             expireAfterReadTask = null;
         }
+    }
+
+    @Override
+    public TimeUnit getExpireAfterWriteTimeUnit() {
+        return timeUnit;
     }
 
 }

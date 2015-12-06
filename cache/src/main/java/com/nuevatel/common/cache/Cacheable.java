@@ -4,6 +4,7 @@
 package com.nuevatel.common.cache;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Cacheable object, only this kind of object can be stored in the cache.
@@ -15,7 +16,7 @@ public interface Cacheable <K, V> {
     
     /**
      * 
-     * @return Object value
+     * @return Cached Object value
      */
     V get();
     
@@ -29,6 +30,9 @@ public interface Cacheable <K, V> {
     
     long getExpireAfterReadTime();
     
+    TimeUnit getExpireAfterReadTimeUnit();
     
     long getExpireAfterWriteTime();
+    
+    TimeUnit getExpireAfterWriteTimeUnit();
 }

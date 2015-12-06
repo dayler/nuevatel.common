@@ -72,6 +72,11 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     
     @Override
     public V get(K key, Long expireAfterWriteTime, Long expireAfterReadTime) {
+        return get(key, expireAfterWriteTime, expireAfterReadTime, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
+    public V get(K key, Long expireAfterWriteTime, Long expireAfterReadTime, TimeUnit timeUnit) {
         Cacheable<K, V>value = cacheMap.get(key);
         if (value == null) {
             synchronized (lck) {
@@ -83,12 +88,12 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
                 try {
                     // load it to cache
                     V tmp = cacheLoader.load(key);
-                    value = new CachedObject<>(tmp, expireAfterWriteTime, expireAfterReadTime);
+                    value = new CachedObject<>(tmp, expireAfterWriteTime, expireAfterReadTime, timeUnit);
                     cacheMap.put(key, value);
                     // initialize tasks
-                    Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime);
+                    Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime, timeUnit);
                     value.setExpireAfterWriteTask(expireAfterWriteTask);
-                    Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime);
+                    Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime, timeUnit);
                     value.setExpireAfterReadTask(expireAfterReadTask);
                     return value.get();
                 } catch (Exception ex) {
@@ -98,10 +103,10 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         }
         
         // reset expire after read task
-        resetExpireAfterReadTask(key, value.getExpireAfterReadTime(), value);
+        resetExpireAfterReadTask(key, value);
         return value.get();
     }
-
+    
     @Override
     public V getUnchecked(K key) {
         Cacheable<K, V>cachedObj = cacheMap.get(key);
@@ -112,15 +117,20 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     public V put(K key, V value) {
         return put(key, value, expireAfterWriteTime, expireAfterReadTime);
     }
-
+    
     @Override
-    public synchronized V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime) {
-        Cacheable<K, V> newCachedObj = new CachedObject<>(value, expireAfterWriteTime, expireAfterReadTime);
+    public V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime) {
+        return put(key, value, expireAfterWriteTime, expireAfterReadTime, TimeUnit.MILLISECONDS);
+    }
+    
+    @Override
+    public synchronized V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime, TimeUnit timeUnit) {
+        Cacheable<K, V> newCachedObj = new CachedObject<>(value, expireAfterWriteTime, expireAfterReadTime, timeUnit);
         cacheMap.put(key, newCachedObj);
         // initialize tasks
-        Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime);
+        Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime, timeUnit);
         newCachedObj.setExpireAfterWriteTask(expireAfterWriteTask);
-        Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime);
+        Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime, timeUnit);
         // get previous if it exists
         newCachedObj.setExpireAfterReadTask(expireAfterReadTask);
         Cacheable<K, V> oldCachedObj = cacheMap.get(key);
@@ -131,12 +141,12 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         oldCachedObj.cancelExpireAfterWriteTask();
         return oldCachedObj.get();
     }
-
+    
     @Override
     public boolean contains(K key) {
         Cacheable<K, V>value = cacheMap.get(key);
         if (value != null) {
-            resetExpireAfterReadTask(key, value.getExpireAfterReadTime(), value);
+            resetExpireAfterReadTask(key, value);
         }
         return cacheMap.containsKey(key);
     }
@@ -164,20 +174,21 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         }
     }
 
-    private void resetExpireAfterReadTask(K key, Long expireAfterReadTime, Cacheable<K, V> value) {
+    private void resetExpireAfterReadTask(K key, Cacheable<K, V> value) {
         synchronized (lck) {
             value.cancelExpireAfterReadTask();
-            Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime);
+            // expireAfterReadTime
+            Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), value.getExpireAfterReadTime(), value.getExpireAfterReadTimeUnit());
             value.setExpireAfterReadTask(expireAfterReadTask);
         }
     }
 
-    private Future<?> scheduleTask(Runnable target, long scheduleTime) {
+    private Future<?> scheduleTask(Runnable target, long scheduleTime, TimeUnit timeUnit) {
         if (scheduleTime == 0) {
             return null;
         }
         
-        return service.schedule(target, scheduleTime, TimeUnit.MILLISECONDS);
+        return service.schedule(target, scheduleTime, timeUnit);
     }
 
     private static final class MinPriorityThreadFactory implements ThreadFactory {
