@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implements lazy load acache.
+ * Implements lazy load acache.<br/>
  * 
  * @author Ariel Salazar
  *
@@ -35,6 +35,11 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     private CacheLoader<K, V>cacheLoader;
     
     /**
+     * Define an action to do after remove an cached object.
+     */
+    private RemovalListener<K, V>removalListener = null;
+    
+    /**
      * Service used to clean cache map, used scheduled tasks.
      */
     private ScheduledExecutorService service;
@@ -50,15 +55,20 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     private long expireAfterReadTime;
     
     public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader) {
-        this(size, cacheLoader, 0L, 0L);
+        this(size, cacheLoader, null, 0L, 0L);
     }
     
-    public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader, long expireAfterWriteTime, long expireAfterReadTime) {
+    public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader, RemovalListener<K, V>removalListener) {
+        this(size, cacheLoader, removalListener, 0L, 0L);
+    }
+    
+    public LoadingCaheImpl(int size, CacheLoader<K, V>cacheLoader, RemovalListener<K, V>removalListener, long expireAfterWriteTime, long expireAfterReadTime) {
         if (cacheLoader == null) {
             throw new IllegalArgumentException("cacheLoader is null");
         }
         
         this.cacheLoader = cacheLoader;
+        this.removalListener = removalListener;
         this.expireAfterWriteTime = expireAfterWriteTime;
         this.expireAfterReadTime = expireAfterReadTime;
         // create service to invalidate keys
@@ -91,9 +101,9 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
                     value = new CachedObject<>(tmp, expireAfterWriteTime, expireAfterReadTime, timeUnit);
                     cacheMap.put(key, value);
                     // initialize tasks
-                    Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime, timeUnit);
+                    Future<?>expireAfterWriteTask = scheduleTask(()->invalidateCachedObject(key), expireAfterWriteTime, timeUnit);
                     value.setExpireAfterWriteTask(expireAfterWriteTask);
-                    Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime, timeUnit);
+                    Future<?>expireAfterReadTask = scheduleTask(()->invalidateCachedObject(key), expireAfterReadTime, timeUnit);
                     value.setExpireAfterReadTask(expireAfterReadTask);
                     return value.get();
                 } catch (Exception ex) {
@@ -105,6 +115,25 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         // reset expire after read task
         resetExpireAfterReadTask(key, value);
         return value.get();
+    }
+    
+    /**
+     * Remove <code>Cacheable<K, V></code> and cancel its future tasks.
+     * 
+     * @param key Key for the object to remove
+     */
+    private V invalidateCachedObject(K key) {
+        Cacheable<K, V>obj = cacheMap.remove(key);
+        if (obj == null) {
+            return null;
+        }
+        obj.cancelExpireAfterReadTask();
+        obj.cancelExpireAfterWriteTask();
+        if (removalListener != null) {
+            // defined removal listener
+            removalListener.onRemoval(key, obj.get());
+        }
+        return obj.get();
     }
     
     @Override
@@ -126,14 +155,12 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
     @Override
     public synchronized V put(K key, V value, Long expireAfterWriteTime, Long expireAfterReadTime, TimeUnit timeUnit) {
         Cacheable<K, V> newCachedObj = new CachedObject<>(value, expireAfterWriteTime, expireAfterReadTime, timeUnit);
-        cacheMap.put(key, newCachedObj);
+        Cacheable<K, V> oldCachedObj = cacheMap.put(key, newCachedObj);
         // initialize tasks
-        Future<?>expireAfterWriteTask = scheduleTask(()->cacheMap.remove(key), expireAfterWriteTime, timeUnit);
+        Future<?>expireAfterWriteTask = scheduleTask(()->invalidateCachedObject(key), expireAfterWriteTime, timeUnit);
         newCachedObj.setExpireAfterWriteTask(expireAfterWriteTask);
-        Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), expireAfterReadTime, timeUnit);
-        // get previous if it exists
+        Future<?>expireAfterReadTask = scheduleTask(()->invalidateCachedObject(key), expireAfterReadTime, timeUnit);
         newCachedObj.setExpireAfterReadTask(expireAfterReadTask);
-        Cacheable<K, V> oldCachedObj = cacheMap.get(key);
         if (oldCachedObj == null) {
             return null;
         }
@@ -141,7 +168,7 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         oldCachedObj.cancelExpireAfterWriteTask();
         return oldCachedObj.get();
     }
-    
+
     @Override
     public boolean contains(K key) {
         Cacheable<K, V>value = cacheMap.get(key);
@@ -153,8 +180,7 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
 
     @Override
     public synchronized V invalidate(K key) {
-        Cacheable<K, V>cahedObj = cacheMap.remove(key);
-        return cahedObj == null ? null : cahedObj.get();
+        return invalidateCachedObject(key);
     }
 
     @Override
@@ -178,7 +204,7 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
         synchronized (lck) {
             value.cancelExpireAfterReadTask();
             // expireAfterReadTime
-            Future<?>expireAfterReadTask = scheduleTask(()->cacheMap.remove(key), value.getExpireAfterReadTime(), value.getExpireAfterReadTimeUnit());
+            Future<?>expireAfterReadTask = scheduleTask(()->invalidateCachedObject(key), value.getExpireAfterReadTime(), value.getExpireAfterReadTimeUnit());
             value.setExpireAfterReadTask(expireAfterReadTask);
         }
     }
@@ -203,5 +229,4 @@ public class LoadingCaheImpl<K,V> implements LoadingCache<K, V> {
             return thread;
         }
     }
-
 }

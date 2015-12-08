@@ -51,12 +51,22 @@ public final class CacheBuilder {
     }
     
     /**
-     * Creates <code>LoadingCache</code> based imput para meters.
      * 
      * @param cacheLoader
      * @return
      */
     public <K, V> LoadingCache<K, V>buildSimpleLoadingCache(CacheLoader<K, V>cacheLoader) {
+        return buildSimpleLoadingCache(cacheLoader, null);
+    }
+    
+    /**
+     * Creates <code>LoadingCache</code> based imput para meters.
+     * 
+     * @param cacheLoader
+     * @param removalListener
+     * @return
+     */
+    public <K, V> LoadingCache<K, V>buildSimpleLoadingCache(CacheLoader<K, V>cacheLoader, RemovalListener<K, V>removalListener) {
         if (cacheLoader == null) {
             throw new IllegalArgumentException("cacheLoader is null");
         }
@@ -77,7 +87,7 @@ public final class CacheBuilder {
             throw new IllegalArgumentException("timeUnit != null actula " + timeUnit);
         }
         
-        return new LoadingCaheImpl<>(size, cacheLoader, expireAfterWriteTime, expireAfterReadTime);
+        return new LoadingCaheImpl<>(size, cacheLoader, removalListener, expireAfterWriteTime, expireAfterReadTime);
     }
     
     public static CacheBuilder newCacheBuilder() {

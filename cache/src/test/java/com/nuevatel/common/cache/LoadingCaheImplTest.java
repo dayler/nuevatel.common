@@ -48,6 +48,7 @@ public class LoadingCaheImplTest {
     public void setUp() throws Exception {
         cache = new LoadingCaheImpl<>(SIZE,
                                       (name)->new Person(name),
+                                      (n, p)->System.out.println("remove:" + n + " age=" + p.age),
                                       TEST_EXPIRE_AFTER_WRITE_TIME,
                                       TEST_EXPIRE_AFTER_READ_TIME);
     }
@@ -78,6 +79,7 @@ public class LoadingCaheImplTest {
     public void newLoadingCacheWithSizeWithCacheLoaderWithExpireWriteAndReadTime() {
         cache = new LoadingCaheImpl<>(SIZE,
                                       (name)->new Person(name),
+                                      (n, p)->System.out.println("remove: name=" + n + " age=" + p.age),
                                       TEST_EXPIRE_AFTER_WRITE_TIME,
                                       TEST_EXPIRE_AFTER_READ_TIME);
         assertNotNull("null cache", cache);

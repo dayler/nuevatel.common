@@ -94,7 +94,7 @@ public interface LoadingCache<K,V> {
     V invalidate(K key);
     
     /**
-     * Removes all objects from cache.
+     * Removes all objects from cache. <b>If RemovalListener is defined, it is NOT call for none element.</b>
      */
     void invalidateAll();
     
