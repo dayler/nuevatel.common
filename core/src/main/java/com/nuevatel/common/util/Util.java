@@ -85,4 +85,28 @@ public class Util {
     public static String runtimePath() {
         return System.getProperty("user.dir");
     }
+    
+    /**
+     * If condition is <code>true</code> execute delegate. In other case do nothing.
+     * 
+     * @param condition
+     * @param delegate
+     */
+    public static void assertTrue(boolean condition, Delegate delegate) {
+        if (condition) {
+            delegate.execute();
+        }
+    }
+    
+    /**
+     * If condition is <code>false</code> execute delegate. In other case do nothing.
+     * 
+     * @param condition
+     * @param delegate
+     */
+    public static void assertFalse(boolean condition, Delegate delegate) {
+        if (!condition) {
+            delegate.execute();
+        }
+    }
 }
