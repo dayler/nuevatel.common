@@ -45,4 +45,12 @@ public class Tic {
     public long getEnd() {
         return end;
     }
+    
+    public long reset() {
+        end = -1L;
+        long tmpElapsedTime = elapsedTime;
+        elapsedTime = -1L;
+        start = System.currentTimeMillis();
+        return tmpElapsedTime;
+    }
 }

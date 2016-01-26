@@ -261,6 +261,59 @@ public class LoadingCaheImplTest {
     }
     
     /**
+     * Test RemovalListener after invalidate.
+     */
+    @Test
+    public void invalidateWithRemovalListener() {
+        TestRemovalListener listener = new TestRemovalListener();
+        cache = new LoadingCaheImpl<>(SIZE,
+                (name)->new Person(name),
+                listener,
+                TEST_EXPIRE_AFTER_WRITE_TIME,
+                TEST_EXPIRE_AFTER_READ_TIME);
+        Person p1 = cache.get("leyla");
+        assertNotNull("cached object null", p1);
+        cache.invalidate("leyla");
+        assertNull("no invalidate cached object", cache.getUnchecked("leyla"));
+        assertTrue("Listener was not executed", listener.isExecuted());
+    }
+    
+    /**
+     * Test RemovalListener after invalidate with put and ExpireWriteAndRead.
+     */
+    @Test
+    public void invalidateWithRemovalListenerAndPutWithExpireWriteAndRead() {
+        TestRemovalListener listener = new TestRemovalListener();
+        cache = new LoadingCaheImpl<>(SIZE,
+                (name)->new Person(name),
+                listener,
+                5000L,
+                10000L);
+        Person p = new Person("leyla");
+        cache.put("leyla", p, 2000L, 1000L);
+        Person p1 = cache.get("leyla");
+        assertNotNull("cached object null", p1);
+        cache.invalidate("leyla");
+        assertNull("no invalidate cached object", cache.getUnchecked("leyla"));
+        assertTrue("Listener was not executed", listener.isExecuted());
+    }
+    
+    private static final class TestRemovalListener implements RemovalListener<String, Person> {
+        
+        private boolean executed = false ;
+        
+        @Override
+        public void onRemoval(String key, Person p) {
+            System.out.println("remove:" + p.name + " age=" + p.age);
+            executed = true;
+        }
+        
+        public boolean isExecuted() {
+            return executed;
+        }
+    }
+    
+    /**
      * Test class for cache loading
      *
      */

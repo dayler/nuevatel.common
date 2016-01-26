@@ -46,6 +46,7 @@ public class StrSubstitutor {
      *
      * @param props Porperties to replace.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public StrSubstitutor(Properties props) {
         this((Map)props);
     }
@@ -54,6 +55,8 @@ public class StrSubstitutor {
         this.map = map;
     }
 
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void load(Properties props) {
         this.map = new HashMap<String, String>((Map)props);
     }
