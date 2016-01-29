@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package com.nuevatel.common.cache;
 
 import java.util.concurrent.TimeUnit;
